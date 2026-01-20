@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wiegand & Hex ⇄ Decimal</title>
+
+<style>
+:root {
+    --primary:#6366f1;
+    --bg:#eef2ff;
+    --card:#fff;
+    --muted:#6b7280;
+}
+* {
+    box-sizing:border-box;
+    font-family:"Segoe UI",system-ui,sans-serif;
+}
+body {
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.container {
+    width:900px;
+    max-width:95%;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+    gap:24px;
+}
+.card {
+    background:var(--card);
+    padding:24px;
+    border-radius:16px;
+    box-shadow:0 20px 40px rgba(0,0,0,.12);
+}
+h2 { margin:0 0 12px; text-align:center; }
+.field { margin-bottom:14px; }
+label {
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:4px;
+    display:block;
+}
+.fc-cn-row {
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+.fc { flex:1; text-align:center; }
+.cn { flex:2; text-align:center; }
+.input-row { display:flex; gap:8px; }
+input {
+    width:100%;
+    padding:12px;
+    font-size:15px;
+    border-radius:10px;
+    border:1px solid #e5e7eb;
+}
+input:focus {
+    outline:none;
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(99,102,241,.2);
+}
+button {
+    padding:0 12px;
+    height:44px;
+    border-radius:10px;
+    border:none;
+    background:var(--primary);
+    color:#fff;
+    cursor:pointer;
+    font-size:14px;
+}
+.copy-mini { font-size:13px; white-space:nowrap; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- 🔐 CALCULADORA WIEGAND -->
+<div class="card">
+<h2>Wiegand ⇄ Hex ⇄ Decimal</h2>
+
+<div class="field">
+<label>Wiegand</label>
+<div class="fc-cn-row">
+<input id="wgFC" class="fc" inputmode="numeric" placeholder="FC">
+<input id="wgCN" class="cn" type="number" min="0" max="65535" step="1" inputmode="numeric" placeholder="CN">
+<button class="copy-mini" id="copyWG">Copiar</button>
+</div>
+</div>
+
+<div class="field">
+<label>Hexadecimal (6 dígitos)</label>
+<div class="input-row">
+<input id="wgHex">
+<button id="copyHex">Copiar</button>
+</div>
+</div>
+
+<div class="field">
+<label>Decimal (0 – 16777215)</label>
+<div class="input-row">
+<input id="wgDec" inputmode="numeric" maxlength="8">
+<button id="copyDec">Copiar</button>
+</div>
+</div>
+</div>
+
+<!-- 🔢 CALCULADORA HEX ⇄ DEC -->
+<div class="card">
+<h2>Hex ⇄ Decimal</h2>
+
+<div class="field">
+<label>Hexadecimal</label>
+<input id="hexLibre">
+</div>
+
+<div class="field">
+<label>Decimal</label>
+<input id="decLibre">
+</div>
+</div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ===== UTIL ===== */
+const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
+const $ = id => document.getElementById(id);
+
+/* ===== ELEMENTOS ===== */
+const wgFC  = $("wgFC");
+const wgCN  = $("wgCN");
+const wgHex = $("wgHex");
+const wgDec = $("wgDec");
+const hexLibre = $("hexLibre");
+const decLibre = $("decLibre");
+
+let lockWG = false;
+let lockLibre = false;
+
+/* ===== COPIAR ===== */
+const copiar = v => v && navigator.clipboard.writeText(v);
+$("copyWG").onclick  = () => copiar(`${wgFC.value}-${wgCN.value}`);
+$("copyHex").onclick = () => copiar(wgHex.value);
+$("copyDec").onclick = () => copiar(wgDec.value);
+
+/* ===== WIEGAND CORE ===== */
+function updateFromFC_CN() {
+    const fc = parseInt(wgFC.value, 10);
+    const cn = parseInt(wgCN.value, 10);
+    if (isNaN(fc) || isNaN(cn)) return;
+    if (fc > 255 || cn > 65535) return;
+
+    const val = (fc << 16) | cn;
+    wgHex.value = val.toString(16).toUpperCase().padStart(6, "0");
+    wgDec.value = val.toString(10);
+}
+
+/* FC */
+wgFC.addEventListener("input", () => {
+    if (lockWG) return;
+    lockWG = true;
+
+    wgFC.value = wgFC.value.replace(/\D/g, "").slice(0, 3);
+    updateFromFC_CN();
+
+    if (wgFC.value.length === 3) wgCN.focus();
+    lockWG = false;
+});
+
+wgFC.addEventListener("blur", () => {
+    if (wgFC.value !== "") {
+        wgFC.value = clamp(parseInt(wgFC.value, 10), 0, 255)
+            .toString()
+            .padStart(3, "0");
+    }
+});
+
+/* CN (spinner) */
+wgCN.addEventListener("input", () => {
+    if (lockWG) return;
+    lockWG = true;
+
+    const n = clamp(parseInt(wgCN.value, 10), 0, 65535);
+    if (!isNaN(n)) {
+        wgCN.value = n;
+        updateFromFC_CN();
+    }
+    lockWG = false;
+});
+
+wgCN.addEventListener("blur", () => {
+    if (wgCN.value !== "") {
+        wgCN.value = parseInt(wgCN.value, 10)
+            .toString()
+            .padStart(5, "0");
+    }
+});
+
+/* HEX */
+wgHex.addEventListener("input", () => {
+    if (lockWG) return;
+    lockWG = true;
+
+    const v = wgHex.value.toUpperCase().replace(/[^0-9A-F]/g, "").slice(0, 6);
+    wgHex.value = v;
+
+    if (v) {
+        const val = parseInt(v, 16);
+        wgFC.value = ((val >> 16) & 0xFF).toString().padStart(3, "0");
+        wgCN.value = (val & 0xFFFF).toString().padStart(5, "0");
+        wgDec.value = val.toString(10);
+    }
+    lockWG = false;
+});
+
+/* DECIMAL WIEGAND (LIMITADO A 8 DÍGITOS Y 24 BITS) */
+wgDec.addEventListener("input", () => {
+    if (lockWG) return;
+    lockWG = true;
+
+    let v = wgDec.value.replace(/\D/g, "").slice(0, 8);
+    let val = parseInt(v, 10);
+
+    if (!isNaN(val)) {
+        val = Math.min(val, 16777215);
+        wgDec.value = val.toString();
+
+        wgFC.value  = ((val >> 16) & 0xFF).toString().padStart(3, "0");
+        wgCN.value  = (val & 0xFFFF).toString().padStart(5, "0");
+        wgHex.value = val.toString(16).toUpperCase().padStart(6, "0");
+    } else {
+        wgDec.value = "";
+    }
+
+    lockWG = false;
+});
+
+/* ===== HEX ⇄ DEC LIBRE ===== */
+hexLibre.addEventListener("input", () => {
+    if (lockLibre) return;
+    lockLibre = true;
+
+    const v = hexLibre.value.toUpperCase().replace(/[^0-9A-F]/g, "");
+    hexLibre.value = v;
+    try {
+        decLibre.value = v ? BigInt("0x" + v).toString(10) : "";
+    } catch {
+        decLibre.value = "";
+    }
+    lockLibre = false;
+});
+
+decLibre.addEventListener("input", () => {
+    if (lockLibre) return;
+    lockLibre = true;
+
+    const v = decLibre.value.replace(/\D/g, "");
+    decLibre.value = v;
+    try {
+        hexLibre.value = v ? BigInt(v).toString(16).toUpperCase() : "";
+    } catch {
+        hexLibre.value = "";
+    }
+    lockLibre = false;
+});
+</script>
+
+</body>
+</html>
