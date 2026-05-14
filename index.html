@@ -89,7 +89,19 @@ input{
     font-size:16px;
     transition:.15s;
 }
+ 
+  /* FLECHAS MÁS GRANDES */
 
+input[type="number"]{
+    height:52px;
+    font-size:17px;
+}
+
+input[type="number"]::-webkit-inner-spin-button{
+    width:40px;
+    height:50px;
+}
+    
 input:focus{
     outline:none;
     border-color:var(--primary);
@@ -360,7 +372,7 @@ function updateFromFC_CN(){
 /* FC */
 /* ===================================== */
 
-wgFC.addEventListener("input",()=>{
+wgFC.addEventListener("input",(e)=>{
 
     if(lockWG) return;
     lockWG = true;
@@ -371,7 +383,11 @@ wgFC.addEventListener("input",()=>{
 
     updateFromFC_CN();
 
-    if(wgFC.value.length === 3){
+    /* SOLO SI EL USUARIO ESCRIBE */
+    if(
+        e.inputType &&
+        wgFC.value.length === 3
+    ){
         wgCN.focus();
     }
 
