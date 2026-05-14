@@ -3,79 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wiegand & Hex ⇄ Decimal</title>
+<title>Wiegand ⇄ Hex ⇄ Decimal ⇄ Bina</title>
 
 <style>
-:root {
+:root{
     --primary:#6366f1;
     --bg:#eef2ff;
-    --card:#fff;
+    --card:#ffffff;
     --muted:#6b7280;
+    --border:#e5e7eb;
 }
-* {
+
+*{
     box-sizing:border-box;
     font-family:"Segoe UI",system-ui,sans-serif;
 }
-body {
+
+body{
     margin:0;
     min-height:100vh;
     background:var(--bg);
     display:flex;
     align-items:center;
     justify-content:center;
+    padding:20px;
 }
-.container {
-    width:900px;
-    max-width:95%;
+
+.container{
+    width:950px;
+    max-width:100%;
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
     gap:24px;
 }
-.card {
+
+.card{
     background:var(--card);
     padding:24px;
-    border-radius:16px;
-    box-shadow:0 20px 40px rgba(0,0,0,.12);
+    border-radius:18px;
+    box-shadow:0 20px 40px rgba(0,0,0,.10);
 }
-h2 { margin:0 0 12px; text-align:center; }
-.field { margin-bottom:14px; }
-label {
+
+h2{
+    margin:0 0 18px;
+    text-align:center;
+}
+
+.field{
+    margin-bottom:16px;
+}
+
+label{
+    display:block;
+    margin-bottom:6px;
     font-size:13px;
     color:var(--muted);
-    margin-bottom:4px;
-    display:block;
 }
-.fc-cn-row {
+
+.fc-cn-row{
     display:flex;
     gap:8px;
     align-items:center;
 }
-.fc { flex:1; text-align:center; }
-.cn { flex:2; text-align:center; }
-.input-row { display:flex; gap:8px; }
-input {
+
+.fc{
+    flex:1;
+    text-align:center;
+}
+
+.cn{
+    flex:2;
+    text-align:center;
+}
+
+.input-row{
+    display:flex;
+    gap:8px;
+}
+
+input{
     width:100%;
     padding:12px;
-    font-size:15px;
     border-radius:10px;
-    border:1px solid #e5e7eb;
+    border:1px solid var(--border);
+    font-size:16px;
+    transition:.15s;
 }
-input:focus {
+
+input:focus{
     outline:none;
     border-color:var(--primary);
-    box-shadow:0 0 0 3px rgba(99,102,241,.2);
+    box-shadow:0 0 0 3px rgba(99,102,241,.18);
 }
-button {
-    padding:0 12px;
-    height:44px;
-    border-radius:10px;
+
+button{
     border:none;
+    border-radius:10px;
     background:var(--primary);
     color:#fff;
+    padding:0 14px;
     cursor:pointer;
     font-size:14px;
+    height:46px;
+    transition:.15s;
 }
-.copy-mini { font-size:13px; white-space:nowrap; }
+
+button:hover{
+    opacity:.92;
+}
+
+.copy-mini{
+    white-space:nowrap;
+}
+
+#wgBin{
+    font-family:Consolas,monospace;
+    letter-spacing:2px;
+    text-align:center;
+}
 </style>
 </head>
 
@@ -83,21 +128,45 @@ button {
 
 <div class="container">
 
-<!-- 🔐 CALCULADORA WIEGAND -->
+<!-- ===================================== -->
+<!-- WIEGAND -->
+<!-- ===================================== -->
+
 <div class="card">
-<h2>Wiegand ⇄ Hex ⇄ Decimal</h2>
+
+<h2>Wiegand ⇄ Hex ⇄ Decimal ⇄ Binario</h2>
 
 <div class="field">
 <label>Wiegand</label>
+
 <div class="fc-cn-row">
-<input id="wgFC" class="fc" inputmode="numeric" placeholder="FC">
-<input id="wgCN" class="cn" type="number" min="0" max="65535" step="1" inputmode="numeric" placeholder="CN">
-<button class="copy-mini" id="copyWG">Copiar</button>
+
+<input
+    id="wgFC"
+    class="fc"
+    inputmode="numeric"
+    placeholder="FC">
+
+<input
+    id="wgCN"
+    class="cn"
+    type="number"
+    min="0"
+    max="65535"
+    step="1"
+    inputmode="numeric"
+    placeholder="CN">
+
+<button class="copy-mini" id="copyWG">
+Copiar
+</button>
+
 </div>
 </div>
 
 <div class="field">
 <label>Hexadecimal (6 dígitos)</label>
+
 <div class="input-row">
 <input id="wgHex">
 <button id="copyHex">Copiar</button>
@@ -106,15 +175,30 @@ button {
 
 <div class="field">
 <label>Decimal (0 – 16777215)</label>
+
 <div class="input-row">
 <input id="wgDec" inputmode="numeric" maxlength="8">
 <button id="copyDec">Copiar</button>
 </div>
 </div>
+
+<div class="field">
+<label>Binario (24 bits)</label>
+
+<div class="input-row">
+<input id="wgBin">
+<button id="copyBin">Copiar</button>
+</div>
 </div>
 
-<!-- 🔢 CALCULADORA HEX ⇄ DEC -->
+</div>
+
+<!-- ===================================== -->
+<!-- HEX ⇄ DEC -->
+<!-- ===================================== -->
+
 <div class="card">
+
 <h2>Hex ⇄ Decimal</h2>
 
 <div class="field">
@@ -126,6 +210,7 @@ button {
 <label>Decimal</label>
 <input id="decLibre">
 </div>
+
 </div>
 
 </div>
@@ -133,145 +218,432 @@ button {
 <script>
 "use strict";
 
-/* ===== UTIL ===== */
-const clamp = (n, min, max) => Math.min(Math.max(n, min), max);
-const $ = id => document.getElementById(id);
+/* ===================================== */
+/* UTIL */
+/* ===================================== */
 
-/* ===== ELEMENTOS ===== */
+const clamp = (n,min,max)=>
+    Math.min(Math.max(n,min),max);
+
+const $ = id =>
+    document.getElementById(id);
+
+/* ===================================== */
+/* ELEMENTOS */
+/* ===================================== */
+
 const wgFC  = $("wgFC");
 const wgCN  = $("wgCN");
 const wgHex = $("wgHex");
 const wgDec = $("wgDec");
+const wgBin = $("wgBin");
+
 const hexLibre = $("hexLibre");
 const decLibre = $("decLibre");
+
+/* ===================================== */
+/* LOCKS */
+/* ===================================== */
 
 let lockWG = false;
 let lockLibre = false;
 
-/* ===== COPIAR ===== */
-const copiar = v => v && navigator.clipboard.writeText(v);
-$("copyWG").onclick  = () => copiar(`${wgFC.value}-${wgCN.value}`);
-$("copyHex").onclick = () => copiar(wgHex.value);
-$("copyDec").onclick = () => copiar(wgDec.value);
+/* ===================================== */
+/* COPIAR */
+/* ===================================== */
 
-/* ===== WIEGAND CORE ===== */
-function updateFromFC_CN() {
-    const fc = parseInt(wgFC.value, 10);
-    const cn = parseInt(wgCN.value, 10);
-    if (isNaN(fc) || isNaN(cn)) return;
-    if (fc > 255 || cn > 65535) return;
+async function copiar(valor, btn){
 
-    const val = (fc << 16) | cn;
-    wgHex.value = val.toString(16).toUpperCase().padStart(6, "0");
-    wgDec.value = val.toString(10);
+    if(!valor) return;
+
+    try{
+
+        await navigator.clipboard.writeText(valor);
+
+        const old = btn.textContent;
+
+        btn.textContent = "✓";
+
+        setTimeout(()=>{
+            btn.textContent = old;
+        },900);
+
+    }catch(e){
+        console.error(e);
+    }
 }
 
+$("copyWG").onclick = e =>
+    copiar(`${wgFC.value}-${wgCN.value}`, e.target);
+
+$("copyHex").onclick = e =>
+    copiar(wgHex.value, e.target);
+
+$("copyDec").onclick = e =>
+    copiar(wgDec.value, e.target);
+
+/* COPIAR BIN SIN GUIONES */
+
+$("copyBin").onclick = e =>
+    copiar(
+        wgBin.value.replace(/-/g,""),
+        e.target
+    );
+
+/* ===================================== */
+/* CONVERSIONES */
+/* ===================================== */
+
+/* FC + CN → VALOR */
+
+function fcCnToVal(fc,cn){
+    return (fc * 65536) + cn;
+}
+
+/* VALOR → FC */
+
+function valToFc(val){
+    return Math.floor(val / 65536);
+}
+
+/* VALOR → CN */
+
+function valToCn(val){
+    return val % 65536;
+}
+
+/* VALOR → HEX */
+
+function valToHex(val){
+    return val
+        .toString(16)
+        .toUpperCase()
+        .padStart(6,"0");
+}
+
+/* VALOR → BIN */
+
+function valToBin(val){
+
+    const bin = val
+        .toString(2)
+        .padStart(24,"0");
+
+    return bin.match(/.{1,8}/g).join("-");
+}
+
+/* ===================================== */
+/* ACTUALIZAR DESDE FC/CN */
+/* ===================================== */
+
+function updateFromFC_CN(){
+
+    const fc = parseInt(wgFC.value,10);
+    const cn = parseInt(wgCN.value,10);
+
+    if(isNaN(fc) || isNaN(cn)) return;
+
+    if(fc > 255 || cn > 65535) return;
+
+    const val = fcCnToVal(fc,cn);
+
+    wgHex.value = valToHex(val);
+    wgDec.value = val.toString(10);
+    wgBin.value = valToBin(val);
+}
+
+/* ===================================== */
 /* FC */
-wgFC.addEventListener("input", () => {
-    if (lockWG) return;
+/* ===================================== */
+
+wgFC.addEventListener("input",()=>{
+
+    if(lockWG) return;
     lockWG = true;
 
-    wgFC.value = wgFC.value.replace(/\D/g, "").slice(0, 3);
+    wgFC.value = wgFC.value
+        .replace(/\D/g,"")
+        .slice(0,3);
+
     updateFromFC_CN();
 
-    if (wgFC.value.length === 3) wgCN.focus();
+    if(wgFC.value.length === 3){
+        wgCN.focus();
+    }
+
     lockWG = false;
 });
 
-wgFC.addEventListener("blur", () => {
-    if (wgFC.value !== "") {
-        wgFC.value = clamp(parseInt(wgFC.value, 10), 0, 255)
-            .toString()
-            .padStart(3, "0");
+wgFC.addEventListener("blur",()=>{
+
+    if(wgFC.value !== ""){
+
+        wgFC.value = clamp(
+            parseInt(wgFC.value,10),
+            0,
+            255
+        )
+        .toString()
+        .padStart(3,"0");
     }
 });
 
-/* CN (spinner) */
-wgCN.addEventListener("input", () => {
-    if (lockWG) return;
-    lockWG = true;
+/* PEGAR FC-CN */
 
-    const n = clamp(parseInt(wgCN.value, 10), 0, 65535);
-    if (!isNaN(n)) {
-        wgCN.value = n;
+wgFC.addEventListener("paste",e=>{
+
+    const text = (
+        e.clipboardData ||
+        window.clipboardData
+    ).getData("text");
+
+    if(text.includes("-")){
+
+        e.preventDefault();
+
+        const [fc,cn] = text.split("-");
+
+        wgFC.value = fc.replace(/\D/g,"");
+        wgCN.value = cn.replace(/\D/g,"");
+
         updateFromFC_CN();
     }
+});
+
+/* ===================================== */
+/* CN */
+/* ===================================== */
+
+wgCN.addEventListener("input",()=>{
+
+    if(lockWG) return;
+    lockWG = true;
+
+    const n = clamp(
+        parseInt(wgCN.value,10),
+        0,
+        65535
+    );
+
+    if(!isNaN(n)){
+
+        wgCN.value = n;
+
+        updateFromFC_CN();
+    }
+
     lockWG = false;
 });
 
-wgCN.addEventListener("blur", () => {
-    if (wgCN.value !== "") {
-        wgCN.value = parseInt(wgCN.value, 10)
+wgCN.addEventListener("blur",()=>{
+
+    if(wgCN.value !== ""){
+
+        wgCN.value = parseInt(wgCN.value,10)
             .toString()
-            .padStart(5, "0");
+            .padStart(5,"0");
     }
 });
 
+/* ===================================== */
 /* HEX */
-wgHex.addEventListener("input", () => {
-    if (lockWG) return;
+/* ===================================== */
+
+wgHex.addEventListener("input",()=>{
+
+    if(lockWG) return;
     lockWG = true;
 
-    const v = wgHex.value.toUpperCase().replace(/[^0-9A-F]/g, "").slice(0, 6);
+    const v = wgHex.value
+        .toUpperCase()
+        .replace(/[^0-9A-F]/g,"")
+        .slice(0,6);
+
     wgHex.value = v;
 
-    if (v) {
-        const val = parseInt(v, 16);
-        wgFC.value = ((val >> 16) & 0xFF).toString().padStart(3, "0");
-        wgCN.value = (val & 0xFFFF).toString().padStart(5, "0");
+    if(v){
+
+        const val = Number.parseInt(v,16);
+
+        wgFC.value = valToFc(val)
+            .toString()
+            .padStart(3,"0");
+
+        wgCN.value = valToCn(val)
+            .toString()
+            .padStart(5,"0");
+
         wgDec.value = val.toString(10);
+
+        wgBin.value = valToBin(val);
     }
+
     lockWG = false;
 });
 
-/* DECIMAL WIEGAND (LIMITADO A 8 DÍGITOS Y 24 BITS) */
-wgDec.addEventListener("input", () => {
-    if (lockWG) return;
+/* AUTO PAD HEX */
+
+wgHex.addEventListener("blur",()=>{
+
+    if(wgHex.value){
+
+        wgHex.value = wgHex.value
+            .padStart(6,"0");
+    }
+});
+
+/* ENTER = COPIAR */
+
+wgHex.addEventListener("keydown",e=>{
+
+    if(e.key === "Enter"){
+
+        copiar(
+            wgHex.value,
+            $("copyHex")
+        );
+    }
+});
+
+/* ===================================== */
+/* DECIMAL */
+/* ===================================== */
+
+wgDec.addEventListener("input",()=>{
+
+    if(lockWG) return;
     lockWG = true;
 
-    let v = wgDec.value.replace(/\D/g, "").slice(0, 8);
-    let val = parseInt(v, 10);
+    let v = wgDec.value
+        .replace(/\D/g,"")
+        .slice(0,8);
 
-    if (!isNaN(val)) {
-        val = Math.min(val, 16777215);
+    let val = parseInt(v,10);
+
+    if(!isNaN(val)){
+
+        val = Math.min(val,16777215);
+
         wgDec.value = val.toString();
 
-        wgFC.value  = ((val >> 16) & 0xFF).toString().padStart(3, "0");
-        wgCN.value  = (val & 0xFFFF).toString().padStart(5, "0");
-        wgHex.value = val.toString(16).toUpperCase().padStart(6, "0");
-    } else {
+        wgFC.value = valToFc(val)
+            .toString()
+            .padStart(3,"0");
+
+        wgCN.value = valToCn(val)
+            .toString()
+            .padStart(5,"0");
+
+        wgHex.value = valToHex(val);
+
+        wgBin.value = valToBin(val);
+
+    }else{
+
         wgDec.value = "";
     }
 
     lockWG = false;
 });
 
-/* ===== HEX ⇄ DEC LIBRE ===== */
-hexLibre.addEventListener("input", () => {
-    if (lockLibre) return;
+/* ===================================== */
+/* BINARIO */
+/* ===================================== */
+
+wgBin.addEventListener("input",()=>{
+
+    if(lockWG) return;
+    lockWG = true;
+
+    const v = wgBin.value
+        .replace(/[^01]/g,"")
+        .slice(0,24);
+
+    if(v){
+
+        wgBin.value = v
+            .match(/.{1,8}/g)
+            ?.join("-") || v;
+
+        const val = Number.parseInt(v,2);
+
+        wgFC.value = valToFc(val)
+            .toString()
+            .padStart(3,"0");
+
+        wgCN.value = valToCn(val)
+            .toString()
+            .padStart(5,"0");
+
+        wgHex.value = valToHex(val);
+
+        wgDec.value = val.toString(10);
+
+    }else{
+
+        wgBin.value = "";
+
+        wgFC.value = "";
+        wgCN.value = "";
+        wgHex.value = "";
+        wgDec.value = "";
+    }
+
+    lockWG = false;
+});
+
+/* ===================================== */
+/* HEX ⇄ DEC LIBRE */
+/* ===================================== */
+
+hexLibre.addEventListener("input",()=>{
+
+    if(lockLibre) return;
     lockLibre = true;
 
-    const v = hexLibre.value.toUpperCase().replace(/[^0-9A-F]/g, "");
+    const v = hexLibre.value
+        .toUpperCase()
+        .replace(/[^0-9A-F]/g,"");
+
     hexLibre.value = v;
-    try {
-        decLibre.value = v ? BigInt("0x" + v).toString(10) : "";
-    } catch {
+
+    try{
+
+        decLibre.value = v
+            ? BigInt("0x"+v).toString(10)
+            : "";
+
+    }catch{
+
         decLibre.value = "";
     }
+
     lockLibre = false;
 });
 
-decLibre.addEventListener("input", () => {
-    if (lockLibre) return;
+decLibre.addEventListener("input",()=>{
+
+    if(lockLibre) return;
     lockLibre = true;
 
-    const v = decLibre.value.replace(/\D/g, "");
+    const v = decLibre.value
+        .replace(/\D/g,"");
+
     decLibre.value = v;
-    try {
-        hexLibre.value = v ? BigInt(v).toString(16).toUpperCase() : "";
-    } catch {
+
+    try{
+
+        hexLibre.value = v
+            ? BigInt(v)
+                .toString(16)
+                .toUpperCase()
+            : "";
+
+    }catch{
+
         hexLibre.value = "";
     }
+
     lockLibre = false;
 });
 </script>
